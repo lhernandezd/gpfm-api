@@ -1,8 +1,11 @@
 const http = require('http');
-const app = require('./server');
-const config = require('./server/config');
+const app = require('./src');
+const config = require('./config');
 
 const { port } = config.server;
+const db = require('./src/models/index');
+
+db.sequelize.sync();
 
 const server = http.createServer(app);
 
