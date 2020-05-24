@@ -7,7 +7,13 @@
     "start": "cross-env NODE_ENV=production node index",
     "dev": "cross-env NODE_ENV=development nodemon --inspect",
     "lint": "cross-env NODE_ENV=development eslint ./**/*.js",
-    "test": "cross-env NODE_ENV=test echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_ENV=test echo \"Error: no test specified\" && exit 1",
+    "db:create": "npx sequelize db:create",
+    "db:drop": "npx sequelize db:drop",
+    "db:migrate": "npx sequelize db:migrate",
+    "db:status": "npx sequelize db:migrate:status",
+    "db:seed": "npx sequelize db:seed:all",
+    "db:rollback": "npx sequelize db:migrate:undo:all"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +31,9 @@
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.2.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^5.21.10"
+    "sequelize": "^5.21.10",
+    "uuid": "^8.1.0",
+    "validator": "^13.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.4",

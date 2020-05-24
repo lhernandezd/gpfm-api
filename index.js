@@ -3,7 +3,7 @@ const app = require('./src');
 const config = require('./config');
 
 const { port } = config.server;
-const db = require('./src/models/index');
+const db = require('./src/models');
 
 db.sequelize.sync();
 

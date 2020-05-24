@@ -21,5 +21,3 @@ module.exports = {
   test: { database: 'gpfm_test', ...config },
   production: { database: process.env.DATABASE_NAME, ...config },
 };
-
-module.exports = config;

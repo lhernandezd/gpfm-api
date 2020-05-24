@@ -1,23 +1,24 @@
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('Roles', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('roles', {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
-      type: Sequelize.INTEGER,
+      defaultValue: Sequelize.UUIDV4,
+      type: Sequelize.UUID,
     },
     name: {
       type: Sequelize.STRING,
+      unique: true,
       allowNull: false,
     },
-    createdAt: {
+    created_at: {
       allowNull: false,
       type: Sequelize.DATE,
     },
-    updatedAt: {
+    updated_at: {
       allowNull: false,
       type: Sequelize.DATE,
     },
   }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('Roles'),
+  down: (queryInterface, Sequelize) => queryInterface.dropTable('roles'),
 };
