@@ -12,6 +12,12 @@ module.exports = {
     last_name: {
       type: Sequelize.STRING,
     },
+    phone_number: {
+      type: Sequelize.STRING,
+    },
+    address: {
+      type: Sequelize.STRING,
+    },
     username: {
       type: Sequelize.STRING,
       allowNull: false,
@@ -31,6 +37,15 @@ module.exports = {
     },
     reset_password_expires: {
       type: Sequelize.DATE,
+    },
+    city_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'cities',
+        },
+        key: 'id',
+      },
     },
     created_at: {
       allowNull: false,

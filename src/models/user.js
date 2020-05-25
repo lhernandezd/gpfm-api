@@ -8,6 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
+    phone_number: DataTypes.STRING,
+    address: DataTypes.STRING,
     username: DataTypes.STRING,
     email: {
       type: DataTypes.STRING,
@@ -38,6 +40,11 @@ module.exports = (sequelize, DataTypes) => {
       through: 'user_roles',
       foreignKey: 'user_id',
       otherKey: 'role_id',
+    });
+
+    User.belongsTo(models.city, {
+      foreignKey: 'city_id',
+      onDelete: 'CASCADE',
     });
   };
 
