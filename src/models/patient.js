@@ -76,6 +76,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'patient_id',
       onDelete: 'CASCADE',
     });
+    Patient.hasMany(models.appointment, {
+      foreignKey: 'patient_id',
+      onDelete: 'CASCADE',
+    });
   };
   return Patient;
 };
