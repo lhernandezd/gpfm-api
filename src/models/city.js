@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'state_id',
       onDelete: 'CASCADE',
     });
+    City.hasMany(models.user, {
+      foreignKey: 'city_id',
+      onDelete: 'CASCADE',
+    });
+    City.hasMany(models.patient, {
+      foreignKey: 'city_id',
+      onDelete: 'CASCADE',
+    });
   };
   return City;
 };

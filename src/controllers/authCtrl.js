@@ -19,6 +19,9 @@ exports.signup = (req, res) => {
     password: bcrypt.hashSync(req.body.password, 8),
   })
     .then((user) => {
+      if (req.body.city_id) {
+        user.setCity(req.body.city_id);
+      }
       if (req.body.roles) {
         Role.findAll({
           where: {
