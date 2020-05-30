@@ -13,6 +13,9 @@ module.exports = {
     end_date: {
       type: Sequelize.DATE,
     },
+    status: {
+      type: Sequelize.STRING,
+    },
     description: {
       type: Sequelize.STRING,
     },

@@ -80,6 +80,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'patient_id',
       onDelete: 'CASCADE',
     });
+    Patient.hasMany(models.history, {
+      foreignKey: 'patient_id',
+      onDelete: 'CASCADE',
+    });
   };
   return Patient;
 };

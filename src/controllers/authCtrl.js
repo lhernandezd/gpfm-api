@@ -6,6 +6,7 @@ const db = require('../models');
 const config = require('../../config');
 
 const User = db.user;
+const City = db.city;
 const Role = db.role;
 
 const { Op } = db.Sequelize;
@@ -20,7 +21,13 @@ exports.signup = (req, res) => {
   })
     .then((user) => {
       if (req.body.city_id) {
-        user.setCity(req.body.city_id);
+        City.findOne({
+          where: {
+            id: req.body.city_id,
+          },
+        }).then((city) => {
+          user.setCity(city);
+        });
       }
       if (req.body.roles) {
         Role.findAll({
