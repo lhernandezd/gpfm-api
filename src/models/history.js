@@ -1,6 +1,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const History = sequelize.define('history', {
+    iid: DataTypes.INTEGER,
     weight: DataTypes.DECIMAL(10, 2),
     height: DataTypes.DECIMAL(10, 2),
     imc: DataTypes.DECIMAL(10, 2),

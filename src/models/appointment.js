@@ -1,6 +1,7 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Appointment = sequelize.define('appointment', {
+    iid: DataTypes.INTEGER,
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,
     status: {

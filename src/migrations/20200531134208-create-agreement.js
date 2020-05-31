@@ -1,30 +1,27 @@
 
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable('contacts', {
+  up: (queryInterface, Sequelize) => queryInterface.createTable('agreements', {
     id: {
       allowNull: false,
+      autoIncrement: true,
       primaryKey: true,
-      defaultValue: Sequelize.UUIDV4,
-      type: Sequelize.UUID,
+      type: Sequelize.INTEGER,
     },
     iid: {
       allowNull: false,
       autoIncrement: true,
       type: Sequelize.INTEGER,
     },
-    first_name: {
+    name: {
       type: Sequelize.STRING,
     },
-    last_name: {
+    code: {
       type: Sequelize.STRING,
     },
-    phone_number: {
+    nit: {
       type: Sequelize.STRING,
     },
-    email: {
-      type: Sequelize.STRING,
-    },
-    occupation: {
+    entity: {
       type: Sequelize.STRING,
     },
     patient_id: {
@@ -45,5 +42,5 @@ module.exports = {
       type: Sequelize.DATE,
     },
   }),
-  down: (queryInterface, Sequelize) => queryInterface.dropTable('contacts'),
+  down: (queryInterface, Sequelize) => queryInterface.dropTable('agreements'),
 };

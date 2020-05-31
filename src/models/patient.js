@@ -2,6 +2,7 @@ const validator = require('validator');
 
 module.exports = (sequelize, DataTypes) => {
   const Patient = sequelize.define('patient', {
+    iid: DataTypes.INTEGER,
     document_type: {
       type: DataTypes.STRING,
       validate: {
@@ -81,6 +82,10 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
     });
     Patient.hasMany(models.history, {
+      foreignKey: 'patient_id',
+      onDelete: 'CASCADE',
+    });
+    Patient.hasOne(models.agreement, {
       foreignKey: 'patient_id',
       onDelete: 'CASCADE',
     });

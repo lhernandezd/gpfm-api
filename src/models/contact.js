@@ -2,6 +2,7 @@ const validator = require('validator');
 
 module.exports = (sequelize, DataTypes) => {
   const Contact = sequelize.define('contact', {
+    iid: DataTypes.INTEGER,
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     phone_number: DataTypes.STRING,

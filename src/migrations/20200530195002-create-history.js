@@ -7,6 +7,11 @@ module.exports = {
       defaultValue: Sequelize.UUIDV4,
       type: Sequelize.UUID,
     },
+    iid: {
+      allowNull: false,
+      autoIncrement: true,
+      type: Sequelize.INTEGER,
+    },
     weight: {
       type: Sequelize.DECIMAL(10, 2),
     },
