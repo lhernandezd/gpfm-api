@@ -1,6 +1,10 @@
 
 module.exports = (sequelize, DataTypes) => {
   const History = sequelize.define('history', {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+    },
     iid: DataTypes.INTEGER,
     weight: DataTypes.DECIMAL(10, 2),
     height: DataTypes.DECIMAL(10, 2),
@@ -27,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     History.belongsTo(models.patient, {
       foreignKey: 'patient_id',
       onDelete: 'CASCADE',
+    });
+    History.belongsToMany(models.code, {
+      through: 'history_codes',
+      foreignKey: 'history_id',
+      otherKey: 'code_id',
     });
   };
   return History;
