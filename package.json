@@ -17,6 +17,7 @@
     "db:migrate": "npx sequelize db:migrate",
     "db:status": "npx sequelize db:migrate:status",
     "db:seed": "npx sequelize db:seed:all",
+    "db:restart": "NODE_ENV=development npm run db:drop && npm run db:create && npm run db:migrate && npm run db:seed && npm run dev",
     "db:rollback": "npx sequelize db:migrate:undo:all"
   },
   "keywords": [],
