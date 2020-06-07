@@ -1,29 +1,26 @@
 const validator = require('validator');
 
 module.exports = (sequelize, DataTypes) => {
-  const Agreement = sequelize.define('agreement', {
+  const Entity = sequelize.define('entity', {
     iid: DataTypes.INTEGER,
     name: DataTypes.STRING,
-    code: {
+    nit: {
       type: DataTypes.STRING,
       validate: {
         isValidNumber(val) {
           if (!validator.isNumeric(val)) {
-            throw new Error('Please use a valid email');
+            throw new Error('Please use a valid nit');
           }
         },
       },
     },
   }, {});
-  Agreement.associate = function (models) {
-    Agreement.belongsTo(models.patient, {
-      foreignKey: 'patient_id',
-      onDelete: 'CASCADE',
-    });
-    Agreement.belongsTo(models.entity, {
+
+  Entity.associate = function (models) {
+    Entity.hasMany(models.agreement, {
       foreignKey: 'entity_id',
       onDelete: 'CASCADE',
     });
   };
-  return Agreement;
+  return Entity;
 };

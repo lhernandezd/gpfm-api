@@ -3,9 +3,9 @@ module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.createTable('agreements', {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
-      type: Sequelize.INTEGER,
+      defaultValue: Sequelize.UUIDV4,
+      type: Sequelize.UUID,
     },
     iid: {
       allowNull: false,
@@ -18,17 +18,20 @@ module.exports = {
     code: {
       type: Sequelize.STRING,
     },
-    nit: {
-      type: Sequelize.STRING,
-    },
-    entity: {
-      type: Sequelize.STRING,
-    },
     patient_id: {
       type: Sequelize.UUID,
       references: {
         model: {
           tableName: 'patients',
+        },
+        key: 'id',
+      },
+    },
+    entity_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'entities',
         },
         key: 'id',
       },
