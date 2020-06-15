@@ -11,7 +11,7 @@ const Role = db.role;
 
 const { Op } = db.Sequelize;
 
-exports.signup = (req, res) => {
+exports.signup = (req, res, next) => {
   // Save User to Database
   User.create({
     id: uuidv4(),
@@ -46,14 +46,18 @@ exports.signup = (req, res) => {
       }
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      next({
+        statusCode: '404',
+        message: err.message,
+      });
     });
 };
 
-exports.signin = (req, res) => {
+exports.signin = (req, res, next) => {
+  console.log('LLEGO', req.body);
   User.findOne({
     where: {
-      username: req.body.username,
+      email: req.body.email,
     },
   })
     .then((user) => {
@@ -67,9 +71,10 @@ exports.signin = (req, res) => {
       );
 
       if (!passwordIsValid) {
-        return res.status(401).send({
-          accessToken: null,
+        next({
+          statusCode: '404',
           message: 'Invalid Password!',
+          accessToken: null,
         });
       }
 
@@ -81,7 +86,7 @@ exports.signin = (req, res) => {
       user.getRoles().then((roles) => {
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < roles.length; i++) {
-          authorities.push(`ROLE_${roles[i].name.toUpperCase()}`);
+          authorities.push(roles[i].name);
         }
         res.status(200).send({
           id: user.id,
@@ -93,6 +98,9 @@ exports.signin = (req, res) => {
       });
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      next({
+        statusCode: '404',
+        message: err.message,
+      });
     });
 };
