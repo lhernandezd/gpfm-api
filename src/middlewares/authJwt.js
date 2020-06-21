@@ -6,7 +6,9 @@ const User = db.user;
 
 // eslint-disable-next-line consistent-return
 const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
+  const { headers = {} } = req;
+  const { authorization = '' } = headers;
+  const [, token] = authorization.split(' ');
 
   if (!token) {
     return res.status(403).send({

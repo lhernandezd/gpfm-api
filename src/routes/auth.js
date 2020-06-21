@@ -2,7 +2,7 @@ const router = require('express').Router({
   mergeParams: true,
 });
 
-const { verifySignUp } = require('../middlewares');
+const { verifySignUp, authJwt } = require('../middlewares');
 const controller = require('../controllers/authCtrl');
 
 router
@@ -16,5 +16,9 @@ router
 router
   .route('/signin')
   .post(controller.signin);
+
+router
+  .route('/signintoken')
+  .post(authJwt.verifyToken, controller.signintoken);
 
 module.exports = router;

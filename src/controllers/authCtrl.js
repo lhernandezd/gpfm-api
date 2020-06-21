@@ -54,7 +54,6 @@ exports.signup = (req, res, next) => {
 };
 
 exports.signin = (req, res, next) => {
-  console.log('LLEGO', req.body);
   User.findOne({
     where: {
       email: req.body.email,
@@ -94,6 +93,39 @@ exports.signin = (req, res, next) => {
           email: user.email,
           roles: authorities,
           accessToken: token,
+        });
+      });
+    })
+    .catch((err) => {
+      next({
+        statusCode: '404',
+        message: err.message,
+      });
+    });
+};
+
+exports.signintoken = (req, res, next) => {
+  User.findOne({
+    where: {
+      id: req.userId,
+    },
+  })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'User Not found.' });
+      }
+
+      const authorities = [];
+      user.getRoles().then((roles) => {
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < roles.length; i++) {
+          authorities.push(roles[i].name);
+        }
+        res.status(200).send({
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          roles: authorities,
         });
       });
     })
