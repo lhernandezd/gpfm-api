@@ -72,7 +72,7 @@ exports.signin = (req, res, next) => {
       if (!passwordIsValid) {
         next({
           statusCode: '404',
-          message: 'Invalid Password!',
+          message: 'Invalid Credentials',
           accessToken: null,
         });
       }
