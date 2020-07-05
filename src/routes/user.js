@@ -14,6 +14,7 @@ router
 router
   .route('/:id')
   .get(authJwt.verifyToken, authJwt.isAdmin, controller.read)
+  .put(authJwt.verifyToken, authJwt.isAdmin, controller.update)
   .delete(authJwt.verifyToken, authJwt.isAdmin, controller.delete);
 
 module.exports = router;

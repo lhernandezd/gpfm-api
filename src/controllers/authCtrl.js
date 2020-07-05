@@ -15,6 +15,7 @@ exports.signup = (req, res, next) => {
   // Save User to Database
   User.create({
     id: uuidv4(),
+    ...req.body,
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
@@ -91,6 +92,10 @@ exports.signin = (req, res, next) => {
           id: user.id,
           username: user.username,
           email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          phone_number: user.phone_number,
+          address: user.address,
           roles: authorities,
           accessToken: token,
         });

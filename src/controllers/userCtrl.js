@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const validator = require('validator');
 
 const paginate = require('../utils/paginate');
@@ -5,6 +6,7 @@ const db = require('../models');
 
 const User = db.user;
 const Role = db.role;
+const { Op } = db.Sequelize;
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -84,6 +86,56 @@ exports.delete = async (req, res, next) => {
     const deleted = user.destroy();
     res.json({
       data: deleted,
+      success: true,
+      statusCode: '200',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  const { user = {} } = req;
+  const {
+    username, address, phone_number, roles, remove_roles,
+  } = req.body;
+  try {
+    const userData = await user.update({
+      username,
+      address,
+      phone_number,
+    });
+    if (roles) {
+      await Role.findAll({
+        where: {
+          name: {
+            [Op.or]: roles,
+          },
+        },
+      }).then((dbRoles) => {
+        user.setRoles(dbRoles);
+      });
+    }
+    if (remove_roles) {
+      await Role.findAll({
+        where: {
+          name: {
+            [Op.or]: remove_roles,
+          },
+        },
+      }).then((dbRoles) => {
+        if (dbRoles.length < 2) {
+          next({
+            statusCode: '400',
+            message: 'Action imposible',
+          });
+        } else {
+          user.removeRoles(dbRoles);
+        }
+      });
+    }
+    res.json({
+      data: userData,
       success: true,
       statusCode: '200',
     });
