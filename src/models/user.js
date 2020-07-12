@@ -7,6 +7,17 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
     },
     iid: DataTypes.INTEGER,
+    status: {
+      type: DataTypes.STRING,
+      validate: {
+        isValidType(val) {
+          const type = ['active', 'inactive'].find((item) => item === val);
+          if (!type) {
+            throw new Error('Please use a valid status');
+          }
+        },
+      },
+    },
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     phone_number: DataTypes.STRING,
@@ -32,6 +43,8 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
+    created_by_id: DataTypes.UUID,
+    updated_by_id: DataTypes.UUID,
     reset_password_token: DataTypes.STRING,
     reset_password_expires: DataTypes.DATE,
   }, {});

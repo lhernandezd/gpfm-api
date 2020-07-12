@@ -1,11 +1,14 @@
 /* eslint-disable camelcase */
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 
 const paginate = require('../utils/paginate');
 const db = require('../models');
 
 const User = db.user;
 const Role = db.role;
+const City = db.city;
 const { Op } = db.Sequelize;
 
 exports.id = async (req, res, next, id) => {
@@ -97,13 +100,15 @@ exports.delete = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   const { user = {} } = req;
   const {
-    username, address, phone_number, roles, remove_roles,
+    username, address, phone_number, roles, remove_roles, status,
   } = req.body;
   try {
     const userData = await user.update({
       username,
       address,
       phone_number,
+      status,
+      updated_by_id: req.userId,
     });
     if (roles) {
       await Role.findAll({
@@ -142,4 +147,51 @@ exports.update = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+exports.create = (req, res, next) => {
+  // Save User to Database
+  console.log(req.body);
+  User.create({
+    id: uuidv4(),
+    ...req.body,
+    username: req.body.username,
+    email: req.body.email,
+    password: bcrypt.hashSync(req.body.password, 8),
+    status: 'active',
+    created_by_id: req.userId,
+    updated_by_id: req.userId,
+  })
+    .then((user) => {
+      if (req.body.city_id) {
+        City.findOne({
+          where: {
+            id: req.body.city_id,
+          },
+        }).then((city) => {
+          user.setCity(city);
+        });
+      }
+      if (req.body.roles) {
+        Role.findAll({
+          where: {
+            name: {
+              [Op.or]: req.body.roles,
+            },
+          },
+        }).then((roles) => {
+          user.setRoles(roles).then(() => {
+            res.send({ message: 'User was registered successfully!' });
+          });
+        });
+      } else {
+        return res.status(404).send({ message: 'User role required' });
+      }
+    })
+    .catch((err) => {
+      next({
+        statusCode: '404',
+        message: err.message,
+      });
+    });
 };

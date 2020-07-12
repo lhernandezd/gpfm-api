@@ -2,14 +2,21 @@ const router = require('express').Router({
   mergeParams: true,
 });
 
-const { authJwt } = require('../middlewares');
+const { verifySignUp, authJwt } = require('../middlewares');
 const controller = require('../controllers/userCtrl');
 
 router.param('id', controller.id);
 
 router
   .route('/')
-  .get(authJwt.verifyToken, authJwt.isAdmin, controller.all);
+  .get(authJwt.verifyToken, authJwt.isAdmin, controller.all)
+  .post(
+    authJwt.verifyToken,
+    authJwt.isAdmin,
+    verifySignUp.checkDuplicateUsernameOrEmail,
+    verifySignUp.checkRolesExisted,
+    controller.create,
+  );
 
 router
   .route('/:id')

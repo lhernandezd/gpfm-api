@@ -11,6 +11,9 @@ module.exports = {
       autoIncrement: true,
       type: Sequelize.INTEGER,
     },
+    status: {
+      type: Sequelize.STRING,
+    },
     first_name: {
       type: Sequelize.STRING,
     },
@@ -48,6 +51,24 @@ module.exports = {
       references: {
         model: {
           tableName: 'cities',
+        },
+        key: 'id',
+      },
+    },
+    created_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
+        },
+        key: 'id',
+      },
+    },
+    updated_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
         },
         key: 'id',
       },
