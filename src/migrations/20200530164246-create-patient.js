@@ -30,7 +30,7 @@ module.exports = {
     birth_date: {
       type: Sequelize.DATE,
     },
-    sex: {
+    gender: {
       type: Sequelize.STRING,
     },
     phone_number: {
@@ -60,6 +60,24 @@ module.exports = {
       references: {
         model: {
           tableName: 'cities',
+        },
+        key: 'id',
+      },
+    },
+    created_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
+        },
+        key: 'id',
+      },
+    },
+    updated_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
         },
         key: 'id',
       },

@@ -7,9 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         isValidType(val) {
-          const type = ['cc', 'ti', 'passport'].find((item) => item === val);
+          const type = ['cc', 'ti', 'pa'].find((item) => item === val);
           if (!type) {
-            throw new Error('Please use a valid document');
+            throw new Error('Please use a valid document type');
           }
         },
       },
@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     last_name: DataTypes.STRING,
     address: DataTypes.STRING,
     birth_date: DataTypes.DATE,
-    sex: DataTypes.STRING,
+    gender: DataTypes.STRING,
     phone_number: DataTypes.STRING,
     email: {
       type: DataTypes.STRING,
@@ -66,6 +66,8 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
+    created_by_id: DataTypes.UUID,
+    updated_by_id: DataTypes.UUID,
   }, {});
 
   Patient.associate = function (models) {
