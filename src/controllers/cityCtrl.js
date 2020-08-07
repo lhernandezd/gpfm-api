@@ -4,6 +4,7 @@ const paginate = require('../utils/paginate');
 const db = require('../models');
 
 const City = db.city;
+const State = db.state;
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -38,6 +39,11 @@ exports.all = async (req, res, next) => {
   try {
     const { rows, count } = await City.findAndCountAll({
       where: {},
+      include: [
+        {
+          model: State,
+        },
+      ],
       ...paginate({ page, pageSize }),
     });
     const pages = Math.ceil(count / pageSize);

@@ -9,6 +9,7 @@ const db = require('../models');
 const User = db.user;
 const Role = db.role;
 const City = db.city;
+const State = db.state;
 const { Op } = db.Sequelize;
 
 exports.id = async (req, res, next, id) => {
@@ -21,6 +22,10 @@ exports.id = async (req, res, next, id) => {
         include: [
           {
             model: Role,
+          },
+          {
+            model: City,
+            include: [State],
           },
         ],
       });
@@ -164,11 +169,13 @@ exports.create = (req, res, next) => {
   })
     .then((user) => {
       if (req.body.city_id) {
+        console.log('city', req.body.city_id);
         City.findOne({
           where: {
             id: req.body.city_id,
           },
         }).then((city) => {
+          console.log('CITY THEN', city);
           user.setCity(city);
         });
       }
