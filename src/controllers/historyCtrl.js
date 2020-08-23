@@ -5,25 +5,26 @@ const paginate = require('../utils/paginate');
 const db = require('../models');
 
 const Patient = db.patient;
+const History = db.history;
 const City = db.city;
 const State = db.state;
 
 exports.id = async (req, res, next, id) => {
   try {
     if (validator.isUUID(id)) {
-      const patient = await Patient.findOne({
+      const history = await History.findOne({
         where: {
           id,
         },
         include: [
           {
-            model: City,
-            include: [State],
+            model: Patient,
+            include: [City, State],
           },
         ],
       });
-      if (patient) {
-        req.patient = patient;
+      if (history) {
+        req.history = history;
         next();
       } else {
         next({
@@ -45,7 +46,7 @@ exports.id = async (req, res, next, id) => {
 exports.all = async (req, res, next) => {
   const { page = 0, pageSize = 10 } = req.query;
   try {
-    const { rows, count } = await Patient.findAndCountAll({
+    const { rows, count } = await History.findAndCountAll({
       where: {},
       ...paginate({ page, pageSize }),
     });
@@ -66,10 +67,10 @@ exports.all = async (req, res, next) => {
 };
 
 exports.read = async (req, res, next) => {
-  const { patient = {} } = req;
-  if (patient) {
+  const { history = {} } = req;
+  if (history) {
     res.json({
-      data: patient,
+      data: history,
       success: true,
       statusCode: '200',
     });
@@ -77,9 +78,9 @@ exports.read = async (req, res, next) => {
 };
 
 exports.delete = async (req, res, next) => {
-  const { patient = {} } = req;
+  const { history = {} } = req;
   try {
-    const deleted = patient.destroy();
+    const deleted = history.destroy();
     res.json({
       data: deleted,
       success: true,
@@ -91,15 +92,15 @@ exports.delete = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-  const { patient = {} } = req;
-  const { ...patientData } = req.body;
+  const { history = {} } = req;
+  const { ...historyData } = req.body;
   try {
-    const patientUpdated = await patient.update({
-      ...patientData,
+    const historyUpdated = await history.update({
+      ...historyData,
       updated_by_id: req.userId,
     });
     res.json({
-      data: patientUpdated,
+      data: historyUpdated,
       success: true,
       statusCode: '200',
     });
@@ -110,26 +111,26 @@ exports.update = async (req, res, next) => {
 
 exports.create = (req, res, next) => {
   // Save User to Database
-  const { ...patientData } = req.body;
-  Patient.create({
+  const { ...historyData } = req.body;
+  History.create({
     id: uuidv4(),
-    ...patientData,
+    ...historyData,
     created_by_id: req.userId,
     updated_by_id: req.userId,
   })
-    .then((patient) => {
-      if (req.body.city_id) {
-        City.findOne({
+    .then((history) => {
+      if (req.body.patient_id) {
+        Patient.findOne({
           where: {
-            id: req.body.city_id,
+            id: req.body.patient_id,
           },
-        }).then((city) => {
-          patient.setCity(city);
+        }).then((patient) => {
+          history.setPatient(patient);
         });
       }
     })
     .then(() => {
-      res.send({ message: 'Patient was registered successfully!' });
+      res.send({ message: 'History was registered successfully!' });
     })
     .catch((err) => {
       next({

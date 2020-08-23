@@ -156,7 +156,6 @@ exports.update = async (req, res, next) => {
 
 exports.create = (req, res, next) => {
   // Save User to Database
-  console.log(req.body);
   User.create({
     id: uuidv4(),
     ...req.body,
@@ -169,13 +168,11 @@ exports.create = (req, res, next) => {
   })
     .then((user) => {
       if (req.body.city_id) {
-        console.log('city', req.body.city_id);
         City.findOne({
           where: {
             id: req.body.city_id,
           },
         }).then((city) => {
-          console.log('CITY THEN', city);
           user.setCity(city);
         });
       }
