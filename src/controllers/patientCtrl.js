@@ -1,11 +1,47 @@
 /* eslint-disable camelcase */
 const { v4: uuidv4 } = require('uuid');
-
+const validator = require('validator');
 const paginate = require('../utils/paginate');
 const db = require('../models');
 
 const Patient = db.patient;
 const City = db.city;
+const State = db.state;
+
+exports.id = async (req, res, next, id) => {
+  try {
+    console.log('ESTE ES EL ID', id);
+    if (validator.isUUID(id)) {
+      const patient = await Patient.findOne({
+        where: {
+          id,
+        },
+        include: [
+          {
+            model: City,
+            include: [State],
+          },
+        ],
+      });
+      if (patient) {
+        req.patient = patient;
+        next();
+      } else {
+        next({
+          statusCode: '404',
+          message: 'Resource not found',
+        });
+      }
+    } else {
+      next({
+        statusCode: '404',
+        message: 'Resource not found',
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 exports.all = async (req, res, next) => {
   const { page = 0, pageSize = 10 } = req.query;
@@ -31,35 +67,19 @@ exports.all = async (req, res, next) => {
 };
 
 exports.read = async (req, res, next) => {
-  const { id } = req.query;
-  try {
-    const patient = await Patient.find({
-      where: {
-        id: {
-          '=': id,
-        },
-      },
-    });
+  const { patient = {} } = req;
+  if (patient) {
     res.json({
       data: patient,
       success: true,
       statusCode: '200',
     });
-  } catch (error) {
-    next(error);
   }
 };
 
 exports.delete = async (req, res, next) => {
-  const { id } = req.query;
+  const { patient = {} } = req;
   try {
-    const patient = await Patient.find({
-      where: {
-        id: {
-          '=': id,
-        },
-      },
-    });
     const deleted = patient.destroy();
     res.json({
       data: deleted,
@@ -72,12 +92,9 @@ exports.delete = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-  const { id } = req.query;
+  const { patient = {} } = req;
   const { ...patientData } = req.body;
   try {
-    const patient = await Patient.find({
-      where: { id },
-    });
     const patientUpdated = await patient.update({
       ...patientData,
       updated_by_id: req.userId,
