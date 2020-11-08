@@ -49,6 +49,15 @@ exports.all = async (req, res, next) => {
     const { rows, count } = await History.findAndCountAll({
       where: {},
       ...paginate({ page, pageSize }),
+      include: [
+        {
+          model: Patient,
+          include: [{
+            model: City,
+            include: [State],
+          }],
+        },
+      ],
     });
     const pages = Math.ceil(count / pageSize);
     res.json({
