@@ -19,7 +19,10 @@ exports.id = async (req, res, next, id) => {
         include: [
           {
             model: Patient,
-            include: [City, State],
+            include: {
+              model: City,
+              include: [State],
+            },
           },
         ],
       });
@@ -77,6 +80,7 @@ exports.all = async (req, res, next) => {
 
 exports.read = async (req, res, next) => {
   const { history = {} } = req;
+  console.log(history);
   if (history) {
     res.json({
       data: history,
