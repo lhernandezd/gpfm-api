@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
+const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
 const db = require('../models');
 
@@ -8,6 +9,8 @@ const Patient = db.patient;
 const History = db.history;
 const City = db.city;
 const State = db.state;
+const Code = db.code;
+const { Op } = db.Sequelize;
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -17,6 +20,9 @@ exports.id = async (req, res, next, id) => {
           id,
         },
         include: [
+          {
+            model: Code,
+          },
           {
             model: Patient,
             include: {
@@ -107,13 +113,60 @@ exports.delete = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   const { history = {} } = req;
   const { ...historyData } = req.body;
+  const desiredHistoryData = omit(historyData, ['code_id', 'remove_codes']);
   try {
     const historyUpdated = await history.update({
-      ...historyData,
+      ...desiredHistoryData,
       updated_by_id: req.userId,
     });
+    if (historyData.code_id) {
+      await Code.findAll({
+        where: {
+          id: {
+            [Op.or]: historyData.code_id,
+          },
+        },
+      }).then((codes) => {
+        history.setCodes(codes);
+      });
+    }
+    if (historyData.remove_codes) {
+      await Code.findAll({
+        where: {
+          id: {
+            [Op.or]: historyData.remove_codes,
+          },
+        },
+      }).then((dbCodes) => {
+        if (dbCodes.length < 2) {
+          next({
+            statusCode: '400',
+            message: 'Action imposible',
+          });
+        } else {
+          history.removeCodes(dbCodes);
+        }
+      });
+    }
+    const historyQuery = await History.findOne({
+      where: {
+        id: historyUpdated.id,
+      },
+      include: [
+        {
+          model: Code,
+        },
+        {
+          model: Patient,
+          include: {
+            model: City,
+            include: [State],
+          },
+        },
+      ],
+    });
     res.json({
-      data: historyUpdated,
+      data: historyQuery,
       success: true,
       statusCode: '200',
     });
@@ -122,33 +175,44 @@ exports.update = async (req, res, next) => {
   }
 };
 
-exports.create = (req, res, next) => {
-  // Save User to Database
+exports.create = async (req, res, next) => {
+  // Save History to Database
   const { ...historyData } = req.body;
-  History.create({
-    id: uuidv4(),
-    ...historyData,
-    created_by_id: req.userId,
-    updated_by_id: req.userId,
-  })
-    .then((history) => {
-      if (req.body.patient_id) {
-        Patient.findOne({
-          where: {
-            id: req.body.patient_id,
-          },
-        }).then((patient) => {
-          history.setPatient(patient);
-        });
-      }
-    })
-    .then(() => {
-      res.send({ message: 'History was registered successfully!' });
-    })
-    .catch((err) => {
-      next({
-        statusCode: '404',
-        message: err.message,
-      });
+  try {
+    const history = await History.create({
+      id: uuidv4(),
+      ...historyData,
+      created_by_id: req.userId,
+      updated_by_id: req.userId,
     });
+    if (req.body.patient_id) {
+      await Patient.findOne({
+        where: {
+          id: req.body.patient_id,
+        },
+      }).then((patient) => {
+        history.setPatient(patient);
+      });
+    }
+    if (req.body.code_id) {
+      await Code.findAll({
+        where: {
+          id: {
+            [Op.or]: req.body.code_id,
+          },
+        },
+      }).then((codes) => {
+        history.setCodes(codes).then(() => {
+          res.send({ message: 'History was registered successfully!' });
+        });
+      });
+    } else {
+      throw new Error('History codes required');
+    }
+  } catch (error) {
+    next({
+      statusCode: '404',
+      message: error.message,
+    });
+  }
 };

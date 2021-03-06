@@ -154,48 +154,47 @@ exports.update = async (req, res, next) => {
   }
 };
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
   // Save User to Database
-  User.create({
-    id: uuidv4(),
-    ...req.body,
-    username: req.body.username,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8),
-    status: 'active',
-    created_by_id: req.userId,
-    updated_by_id: req.userId,
-  })
-    .then((user) => {
-      if (req.body.city_id) {
-        City.findOne({
-          where: {
-            id: req.body.city_id,
-          },
-        }).then((city) => {
-          user.setCity(city);
-        });
-      }
-      if (req.body.roles) {
-        Role.findAll({
-          where: {
-            name: {
-              [Op.or]: req.body.roles,
-            },
-          },
-        }).then((roles) => {
-          user.setRoles(roles).then(() => {
-            res.send({ message: 'User was registered successfully!' });
-          });
-        });
-      } else {
-        return res.status(404).send({ message: 'User role required' });
-      }
-    })
-    .catch((err) => {
-      next({
-        statusCode: '404',
-        message: err.message,
-      });
+  try {
+    const user = await User.create({
+      id: uuidv4(),
+      ...req.body,
+      username: req.body.username,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 8),
+      status: 'active',
+      created_by_id: req.userId,
+      updated_by_id: req.userId,
     });
+    if (req.body.city_id) {
+      await City.findOne({
+        where: {
+          id: req.body.city_id,
+        },
+      }).then((city) => {
+        user.setCity(city);
+      });
+    }
+    if (req.body.roles) {
+      await Role.findAll({
+        where: {
+          name: {
+            [Op.or]: req.body.roles,
+          },
+        },
+      }).then((roles) => {
+        user.setRoles(roles).then(() => {
+          res.send({ message: 'User was registered successfully!' });
+        });
+      });
+    } else {
+      throw new Error('User role required');
+    }
+  } catch (error) {
+    next({
+      statusCode: '404',
+      message: error.message,
+    });
+  }
 };
