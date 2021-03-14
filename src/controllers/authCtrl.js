@@ -130,6 +130,10 @@ exports.signintoken = (req, res, next) => {
           id: user.id,
           username: user.username,
           email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          phone_number: user.phone_number,
+          address: user.address,
           roles: authorities,
         });
       });

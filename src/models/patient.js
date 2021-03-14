@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       validate: {
         isValidType(val) {
-          const type = ['o', 'a', 'b', 'ab'].find((item) => item === val);
+          const type = ['o-', 'o+', 'a-', 'a+', 'b-', 'b+', 'ab-', 'ab+'].find((item) => item === val);
           if (!type) {
             throw new Error('Please use a valid blood type');
           }

@@ -108,33 +108,30 @@ exports.update = async (req, res, next) => {
   }
 };
 
-exports.create = (req, res, next) => {
+exports.create = async (req, res, next) => {
   // Save User to Database
   const { ...patientData } = req.body;
-  Patient.create({
-    id: uuidv4(),
-    ...patientData,
-    created_by_id: req.userId,
-    updated_by_id: req.userId,
-  })
-    .then((patient) => {
-      if (req.body.city_id) {
-        City.findOne({
-          where: {
-            id: req.body.city_id,
-          },
-        }).then((city) => {
-          patient.setCity(city);
-        });
-      }
-    })
-    .then(() => {
-      res.send({ message: 'Patient was registered successfully!' });
-    })
-    .catch((err) => {
-      next({
-        statusCode: '404',
-        message: err.message,
-      });
+  try {
+    const patient = await Patient.create({
+      id: uuidv4(),
+      ...patientData,
+      created_by_id: req.userId,
+      updated_by_id: req.userId,
     });
+    if (req.body.city_id) {
+      await City.findOne({
+        where: {
+          id: req.body.city_id,
+        },
+      }).then((city) => {
+        patient.setCity(city);
+      });
+    }
+    res.send({ message: 'Patient was registered successfully!' });
+  } catch (error) {
+    next({
+      statusCode: '404',
+      message: error.message,
+    });
+  }
 };

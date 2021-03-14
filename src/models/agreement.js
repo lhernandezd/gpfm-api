@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'entity_id',
       onDelete: 'CASCADE',
     });
+    Agreement.hasMany(models.history, {
+      foreignKey: 'agreement_id',
+      onDelete: 'CASCADE',
+    });
   };
   return Agreement;
 };

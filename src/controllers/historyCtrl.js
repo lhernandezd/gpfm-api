@@ -10,6 +10,7 @@ const History = db.history;
 const City = db.city;
 const State = db.state;
 const Code = db.code;
+const Agreement = db.agreement;
 const { Op } = db.Sequelize;
 
 exports.id = async (req, res, next, id) => {
@@ -86,7 +87,6 @@ exports.all = async (req, res, next) => {
 
 exports.read = async (req, res, next) => {
   const { history = {} } = req;
-  console.log(history);
   if (history) {
     res.json({
       data: history,
@@ -208,6 +208,15 @@ exports.create = async (req, res, next) => {
       });
     } else {
       throw new Error('History codes required');
+    }
+    if (req.body.agreement_id) {
+      await Agreement.findOne({
+        where: {
+          id: req.body.agreement_id,
+        },
+      }).then((agreement) => {
+        history.setAgreement(agreement);
+      });
     }
   } catch (error) {
     next({

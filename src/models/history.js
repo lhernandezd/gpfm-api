@@ -26,10 +26,16 @@ module.exports = (sequelize, DataTypes) => {
     consent: DataTypes.TEXT,
     current_illness: DataTypes.TEXT,
     current_treatment: DataTypes.TEXT,
+    created_by_id: DataTypes.UUID,
+    updated_by_id: DataTypes.UUID,
   }, {});
   History.associate = function (models) {
     History.belongsTo(models.patient, {
       foreignKey: 'patient_id',
+      onDelete: 'CASCADE',
+    });
+    History.belongsTo(models.agreement, {
+      foreignKey: 'agreement_id',
       onDelete: 'CASCADE',
     });
     History.belongsToMany(models.code, {

@@ -81,6 +81,33 @@ module.exports = {
         key: 'id',
       },
     },
+    agreement_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'agreements',
+        },
+        key: 'id',
+      },
+    },
+    created_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
+        },
+        key: 'id',
+      },
+    },
+    updated_by_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'users',
+        },
+        key: 'id',
+      },
+    },
     created_at: {
       allowNull: false,
       type: Sequelize.DATE,

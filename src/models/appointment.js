@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     description: DataTypes.STRING,
+    created_by_id: DataTypes.UUID,
+    updated_by_id: DataTypes.UUID,
   }, {});
   Appointment.associate = function (models) {
     Appointment.belongsTo(models.patient, {
