@@ -119,6 +119,24 @@ exports.update = async (req, res, next) => {
       ...desiredHistoryData,
       updated_by_id: req.userId,
     });
+    if (req.body.patient_id) {
+      await Patient.findOne({
+        where: {
+          id: req.body.patient_id,
+        },
+      }).then((patient) => {
+        history.setPatient(patient);
+      });
+    }
+    if (req.body.agreement_id) {
+      await Agreement.findOne({
+        where: {
+          id: req.body.agreement_id,
+        },
+      }).then((agreement) => {
+        history.setAgreement(agreement);
+      });
+    }
     if (historyData.code_id) {
       await Code.findAll({
         where: {
@@ -157,6 +175,9 @@ exports.update = async (req, res, next) => {
           model: Code,
         },
         {
+          model: Agreement,
+        },
+        {
           model: Patient,
           include: {
             model: City,
@@ -193,6 +214,17 @@ exports.create = async (req, res, next) => {
       }).then((patient) => {
         history.setPatient(patient);
       });
+    } else {
+      throw new Error('History patient required');
+    }
+    if (req.body.agreement_id) {
+      await Agreement.findOne({
+        where: {
+          id: req.body.agreement_id,
+        },
+      }).then((agreement) => {
+        history.setAgreement(agreement);
+      });
     }
     if (req.body.code_id) {
       await Code.findAll({
@@ -208,15 +240,6 @@ exports.create = async (req, res, next) => {
       });
     } else {
       throw new Error('History codes required');
-    }
-    if (req.body.agreement_id) {
-      await Agreement.findOne({
-        where: {
-          id: req.body.agreement_id,
-        },
-      }).then((agreement) => {
-        history.setAgreement(agreement);
-      });
     }
   } catch (error) {
     next({

@@ -87,8 +87,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'patient_id',
       onDelete: 'CASCADE',
     });
-    Patient.hasOne(models.agreement, {
-      foreignKey: 'patient_id',
+    Patient.belongsTo(models.agreement, {
+      foreignKey: 'agreement_id',
       onDelete: 'CASCADE',
     });
   };

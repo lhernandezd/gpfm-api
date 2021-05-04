@@ -8,26 +8,30 @@ const Patient = db.patient;
 const City = db.city;
 const State = db.state;
 const Agreement = db.agreement;
+const Entity = db.entity;
 
 exports.id = async (req, res, next, id) => {
   try {
     if (validator.isUUID(id)) {
-      const patient = await Patient.findOne({
+      const agreement = await Agreement.findOne({
         where: {
           id,
         },
         include: [
           {
-            model: City,
-            include: [State],
+            model: Patient,
+            include: [{
+              model: City,
+              include: [State],
+            }],
           },
           {
-            model: Agreement,
+            model: Entity,
           },
         ],
       });
-      if (patient) {
-        req.patient = patient;
+      if (agreement) {
+        req.agreement = agreement;
         next();
       } else {
         next({
@@ -49,16 +53,19 @@ exports.id = async (req, res, next, id) => {
 exports.all = async (req, res, next) => {
   const { page = 0, pageSize = 10 } = req.query;
   try {
-    const { rows, count } = await Patient.findAndCountAll({
+    const { rows, count } = await Agreement.findAndCountAll({
       where: {},
       ...paginate({ page, pageSize }),
       include: [
         {
-          model: City,
-          include: [State],
+          model: Patient,
+          include: [{
+            model: City,
+            include: [State],
+          }],
         },
         {
-          model: Agreement,
+          model: Entity,
         },
       ],
     });
@@ -79,10 +86,10 @@ exports.all = async (req, res, next) => {
 };
 
 exports.read = async (req, res, next) => {
-  const { patient = {} } = req;
-  if (patient) {
+  const { agreement = {} } = req;
+  if (agreement) {
     res.json({
-      data: patient,
+      data: agreement,
       success: true,
       statusCode: '200',
     });
@@ -90,9 +97,9 @@ exports.read = async (req, res, next) => {
 };
 
 exports.delete = async (req, res, next) => {
-  const { patient = {} } = req;
+  const { agreement = {} } = req;
   try {
-    const deleted = patient.destroy();
+    const deleted = agreement.destroy();
     res.json({
       data: deleted,
       success: true,
@@ -104,47 +111,34 @@ exports.delete = async (req, res, next) => {
 };
 
 exports.update = async (req, res, next) => {
-  const { patient = {} } = req;
-  const { ...patientData } = req.body;
+  const { agreement = {} } = req;
+  const { ...agreementData } = req.body;
   try {
-    const patientUpdated = await patient.update({
-      ...patientData,
+    const agreementUpdated = await agreement.update({
+      ...agreementData,
       updated_by_id: req.userId,
     });
-    if (req.body.city_id) {
-      await City.findOne({
+    if (req.body.entity_id) {
+      await Entity.findOne({
         where: {
-          id: req.body.city_id,
+          id: req.body.entity_id,
         },
-      }).then((city) => {
-        patient.setCity(city);
+      }).then((entity) => {
+        agreement.setEntity(entity);
       });
     }
-    if (req.body.agreement_id) {
-      await Agreement.findOne({
-        where: {
-          id: req.body.agreement_id,
-        },
-      }).then((agreement) => {
-        patient.setAgreement(agreement);
-      });
-    }
-    const patientQuery = await Agreement.findOne({
+    const agreementQuery = await Agreement.findOne({
       where: {
-        id: patientUpdated.id,
+        id: agreementUpdated.id,
       },
       include: [
         {
-          model: City,
-          include: [State],
-        },
-        {
-          model: Agreement,
+          model: Entity,
         },
       ],
     });
     res.json({
-      data: patientQuery,
+      data: agreementQuery,
       success: true,
       statusCode: '200',
     });
@@ -154,34 +148,28 @@ exports.update = async (req, res, next) => {
 };
 
 exports.create = async (req, res, next) => {
-  // Save User to Database
-  const { ...patientData } = req.body;
+  // Save Agreement to Database
+  const { ...agreementData } = req.body;
   try {
-    const patient = await Patient.create({
+    const agreement = await Agreement.create({
       id: uuidv4(),
-      ...patientData,
+      ...agreementData,
       created_by_id: req.userId,
       updated_by_id: req.userId,
     });
-    if (req.body.city_id) {
-      await City.findOne({
+    if (req.body.entity_id) {
+      await Entity.findOne({
         where: {
-          id: req.body.city_id,
+          id: req.body.entity_id,
         },
-      }).then((city) => {
-        patient.setCity(city);
+      }).then((entity) => {
+        agreement.setEntity(entity).then(() => {
+          res.send({ message: 'Agreement was registered successfully!' });
+        });
       });
+    } else {
+      throw new Error('Entity required');
     }
-    if (req.body.agreement_id) {
-      await Agreement.findOne({
-        where: {
-          id: req.body.agreement_id,
-        },
-      }).then((agreement) => {
-        patient.setAgreement(agreement);
-      });
-    }
-    res.send({ message: 'Patient was registered successfully!' });
   } catch (error) {
     next({
       statusCode: '404',

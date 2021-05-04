@@ -31,7 +31,7 @@ exports.signup = (req, res, next) => {
         });
       }
       if (req.body.roles) {
-        Role.findAll({
+        return Role.findAll({
           where: {
             name: {
               [Op.or]: req.body.roles,
@@ -42,9 +42,8 @@ exports.signup = (req, res, next) => {
             res.send({ message: 'User was registered successfully!' });
           });
         });
-      } else {
-        return res.status(404).send({ message: 'User role required' });
       }
+      return res.status(404).send({ message: 'User role required' });
     })
     .catch((err) => {
       next({
@@ -83,7 +82,7 @@ exports.signin = (req, res, next) => {
       });
 
       const authorities = [];
-      user.getRoles().then((roles) => {
+      return user.getRoles().then((roles) => {
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < roles.length; i++) {
           authorities.push(roles[i].name);
@@ -121,7 +120,7 @@ exports.signintoken = (req, res, next) => {
       }
 
       const authorities = [];
-      user.getRoles().then((roles) => {
+      return user.getRoles().then((roles) => {
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < roles.length; i++) {
           authorities.push(roles[i].name);

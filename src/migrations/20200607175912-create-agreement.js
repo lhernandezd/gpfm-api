@@ -18,15 +18,6 @@ module.exports = {
     code: {
       type: Sequelize.STRING,
     },
-    patient_id: {
-      type: Sequelize.UUID,
-      references: {
-        model: {
-          tableName: 'patients',
-        },
-        key: 'id',
-      },
-    },
     entity_id: {
       type: Sequelize.UUID,
       references: {

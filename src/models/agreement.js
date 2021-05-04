@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {});
   Agreement.associate = function (models) {
-    Agreement.belongsTo(models.patient, {
-      foreignKey: 'patient_id',
+    Agreement.hasMany(models.patient, {
+      foreignKey: 'agreement_id',
       onDelete: 'CASCADE',
     });
     Agreement.belongsTo(models.entity, {

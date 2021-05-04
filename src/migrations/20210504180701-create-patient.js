@@ -64,6 +64,15 @@ module.exports = {
         key: 'id',
       },
     },
+    agreement_id: {
+      type: Sequelize.UUID,
+      references: {
+        model: {
+          tableName: 'agreements',
+        },
+        key: 'id',
+      },
+    },
     created_by_id: {
       type: Sequelize.UUID,
       references: {
