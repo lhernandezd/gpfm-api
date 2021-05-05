@@ -7,6 +7,7 @@ const cities = require('./cities');
 const histories = require('./histories');
 const codes = require('./codes');
 const entities = require('./entities');
+const agreements = require('./agreements');
 
 router.use('/auth', auth);
 router.use('/users', users);
@@ -15,5 +16,6 @@ router.use('/cities', cities);
 router.use('/histories', histories);
 router.use('/codes', codes);
 router.use('/entities', entities);
+router.use('/agreements', agreements);
 
 module.exports = router;
