@@ -115,79 +115,55 @@ exports.update = async (req, res, next) => {
   const { ...historyData } = req.body;
   const desiredHistoryData = omit(historyData, ['code_id', 'remove_codes']);
   try {
-    const historyUpdated = await history.update({
-      ...desiredHistoryData,
-      updated_by_id: req.userId,
+    const result = await db.sequelize.transaction(async (t) => {
+      const historyUpdated = await history.update({
+        ...desiredHistoryData,
+        updated_by_id: req.userId,
+      });
+      if (req.body.patient_id) {
+        const patientFound = await Patient.findOne({
+          where: {
+            id: req.body.patient_id,
+          },
+        }, { transaction: t });
+        await historyUpdated.setPatient(patientFound);
+      }
+      if (req.body.agreement_id) {
+        const agreementFound = await Agreement.findOne({
+          where: {
+            id: req.body.agreement_id,
+          },
+        }, { transaction: t });
+        await historyUpdated.setAgreement(agreementFound);
+      }
+      if (historyData.code_id) {
+        const codesFound = await Code.findAll({
+          where: {
+            id: {
+              [Op.or]: historyData.code_id,
+            },
+          },
+        }, { transaction: t });
+        await historyUpdated.setCodes(codesFound);
+      }
+      if (historyData.remove_codes) {
+        const removeCodesFound = await Code.findAll({
+          where: {
+            id: {
+              [Op.or]: historyData.remove_codes,
+            },
+          },
+        }, { transaction: t });
+        await historyUpdated.removeCodes(removeCodesFound);
+      }
+
+      return historyUpdated;
     });
-    if (req.body.patient_id) {
-      await Patient.findOne({
-        where: {
-          id: req.body.patient_id,
-        },
-      }).then((patient) => {
-        history.setPatient(patient);
-      });
-    }
-    if (req.body.agreement_id) {
-      await Agreement.findOne({
-        where: {
-          id: req.body.agreement_id,
-        },
-      }).then((agreement) => {
-        history.setAgreement(agreement);
-      });
-    }
-    if (historyData.code_id) {
-      await Code.findAll({
-        where: {
-          id: {
-            [Op.or]: historyData.code_id,
-          },
-        },
-      }).then((codes) => {
-        history.setCodes(codes);
-      });
-    }
-    if (historyData.remove_codes) {
-      await Code.findAll({
-        where: {
-          id: {
-            [Op.or]: historyData.remove_codes,
-          },
-        },
-      }).then((dbCodes) => {
-        if (dbCodes.length < 2) {
-          next({
-            statusCode: '400',
-            message: 'Action imposible',
-          });
-        } else {
-          history.removeCodes(dbCodes);
-        }
-      });
-    }
-    const historyQuery = await History.findOne({
-      where: {
-        id: historyUpdated.id,
-      },
-      include: [
-        {
-          model: Code,
-        },
-        {
-          model: Agreement,
-        },
-        {
-          model: Patient,
-          include: {
-            model: City,
-            include: [State],
-          },
-        },
-      ],
-    });
+
+    const reloadResult = await result.reload();
+
     res.json({
-      data: historyQuery,
+      data: reloadResult,
       success: true,
       statusCode: '200',
     });
@@ -200,13 +176,13 @@ exports.create = async (req, res, next) => {
   // Save History to Database
   const { ...historyData } = req.body;
   try {
-    const history = await History.create({
-      id: uuidv4(),
-      ...historyData,
-      created_by_id: req.userId,
-      updated_by_id: req.userId,
-    });
-    if (req.body.patient_id) {
+    if (req.body.patient_id && req.body.agreement_id && req.body.code_id) {
+      const history = await History.create({
+        id: uuidv4(),
+        ...historyData,
+        created_by_id: req.userId,
+        updated_by_id: req.userId,
+      });
       await Patient.findOne({
         where: {
           id: req.body.patient_id,
@@ -214,10 +190,6 @@ exports.create = async (req, res, next) => {
       }).then((patient) => {
         history.setPatient(patient);
       });
-    } else {
-      throw new Error('History patient required');
-    }
-    if (req.body.agreement_id) {
       await Agreement.findOne({
         where: {
           id: req.body.agreement_id,
@@ -225,8 +197,6 @@ exports.create = async (req, res, next) => {
       }).then((agreement) => {
         history.setAgreement(agreement);
       });
-    }
-    if (req.body.code_id) {
       await Code.findAll({
         where: {
           id: {
@@ -239,7 +209,15 @@ exports.create = async (req, res, next) => {
         });
       });
     } else {
-      throw new Error('History codes required');
+      const errorMessage = 'History required fields';
+      const errorArray = [];
+      if (!req.body.patient_id) errorArray.push('Patient');
+      if (!req.body.agreement_id) errorArray.push('Agreement');
+      if (!req.body.code_id) errorArray.push('CIE Code');
+      next({
+        statusCode: '400',
+        message: `${errorMessage}: ${errorArray.join(', ')}`,
+      });
     }
   } catch (error) {
     next({

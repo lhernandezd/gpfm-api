@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         isValidNumber(val) {
           if (!validator.isNumeric(val)) {
-            throw new Error('Please use a valid email');
+            throw new Error('Please use a valid code');
           }
         },
       },

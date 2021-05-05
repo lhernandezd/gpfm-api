@@ -8,6 +8,7 @@ const Patient = db.patient;
 const City = db.city;
 const State = db.state;
 const Agreement = db.agreement;
+const Contact = db.contact;
 
 exports.id = async (req, res, next, id) => {
   try {
@@ -23,6 +24,9 @@ exports.id = async (req, res, next, id) => {
           },
           {
             model: Agreement,
+          },
+          {
+            model: Contact,
           },
         ],
       });
@@ -59,6 +63,9 @@ exports.all = async (req, res, next) => {
         },
         {
           model: Agreement,
+        },
+        {
+          model: Contact,
         },
       ],
     });
@@ -157,13 +164,13 @@ exports.create = async (req, res, next) => {
   // Save User to Database
   const { ...patientData } = req.body;
   try {
-    const patient = await Patient.create({
-      id: uuidv4(),
-      ...patientData,
-      created_by_id: req.userId,
-      updated_by_id: req.userId,
-    });
-    if (req.body.city_id) {
+    if (req.body.city_id && req.body.agreement_id) {
+      const patient = await Patient.create({
+        id: uuidv4(),
+        ...patientData,
+        created_by_id: req.userId,
+        updated_by_id: req.userId,
+      });
       await City.findOne({
         where: {
           id: req.body.city_id,
@@ -171,17 +178,33 @@ exports.create = async (req, res, next) => {
       }).then((city) => {
         patient.setCity(city);
       });
-    }
-    if (req.body.agreement_id) {
       await Agreement.findOne({
         where: {
           id: req.body.agreement_id,
         },
       }).then((agreement) => {
-        patient.setAgreement(agreement);
+        patient.setAgreement(agreement).then(() => {
+          if (req.body.contacts) {
+            req.body.contacts.forEach(async (contact) => {
+              await Contact.create({
+                id: uuidv4(),
+                ...contact,
+                patient_id: patient.id,
+                created_by_id: req.userId,
+                updated_by_id: req.userId,
+              });
+            });
+          }
+          res.send({ message: 'Patient was registered successfully!' });
+        });
       });
+    } else {
+      const errorMessage = 'Patient required fields';
+      const errorArray = [];
+      if (!req.body.city_id) errorArray.push('City');
+      if (!req.body.agreement_id) errorArray.push('Agreement');
+      throw new Error(`${errorMessage}: ${errorArray.join(', ')}`);
     }
-    res.send({ message: 'Patient was registered successfully!' });
   } catch (error) {
     next({
       statusCode: '404',
