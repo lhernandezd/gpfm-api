@@ -16,4 +16,8 @@ router
     controller.create,
   );
 
+router
+  .route('/:id')
+  .get(authJwt.verifyToken, authJwt.isAdmin, controller.read);
+
 module.exports = router;

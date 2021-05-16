@@ -61,6 +61,17 @@ exports.all = async (req, res, next) => {
   }
 };
 
+exports.read = async (req, res, next) => {
+  const { entity = {} } = req;
+  if (entity) {
+    res.json({
+      data: entity,
+      success: true,
+      statusCode: '200',
+    });
+  }
+};
+
 exports.create = async (req, res, next) => {
   // Save Entity to Database
   try {
