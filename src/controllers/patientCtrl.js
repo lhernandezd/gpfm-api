@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
+const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
 const db = require('../models');
 
@@ -114,44 +115,68 @@ exports.update = async (req, res, next) => {
   const { patient = {} } = req;
   const { ...patientData } = req.body;
   try {
-    const patientUpdated = await patient.update({
-      ...patientData,
-      updated_by_id: req.userId,
-    });
-    if (req.body.city_id) {
-      await City.findOne({
-        where: {
-          id: req.body.city_id,
-        },
-      }).then((city) => {
-        patient.setCity(city);
+    const result = await db.sequelize.transaction(async (t) => {
+      if (req.body.contacts) {
+        req.body.contacts.forEach(async (contact) => {
+          if (contact.id) {
+            const existContact = await Contact.findOne({
+              where: {
+                id: contact.id,
+              },
+            }, { transaction: t });
+            await existContact.update({
+              ...omit(contact, ['created_at', 'updated_at', 'id', 'iid']),
+              updated_by_id: req.userId,
+            });
+          } else {
+            await Contact.create({
+              id: uuidv4(),
+              ...contact,
+              patient_id: patient.id,
+              created_by_id: req.userId,
+              updated_by_id: req.userId,
+            }, { transaction: t });
+          }
+        });
+      }
+      if (req.body.remove_contacts) {
+        req.body.remove_contacts.forEach(async (contact) => {
+          const removeContactsFound = await Contact.findOne({
+            where: {
+              id: contact.id,
+            },
+          }, { transaction: t });
+          await removeContactsFound.destroy({ transaction: t });
+        });
+      }
+      const patientUpdated = await patient.update({
+        ...patientData,
+        updated_by_id: req.userId,
       });
-    }
-    if (req.body.agreement_id) {
-      await Agreement.findOne({
-        where: {
-          id: req.body.agreement_id,
-        },
-      }).then((agreement) => {
-        patient.setAgreement(agreement);
-      });
-    }
-    const patientQuery = await Agreement.findOne({
-      where: {
-        id: patientUpdated.id,
-      },
-      include: [
-        {
-          model: City,
-          include: [State],
-        },
-        {
-          model: Agreement,
-        },
-      ],
+      if (req.body.city_id) {
+        const cityFound = await City.findOne({
+          where: {
+            id: req.body.city_id,
+          },
+        }, { transaction: t });
+        await patientUpdated.setCity(cityFound);
+      }
+      if (req.body.agreement_id) {
+        const agreementFound = await Agreement.findOne({
+          where: {
+            id: req.body.agreement_id,
+          },
+        }, { transaction: t });
+        await patientUpdated.setAgreement(agreementFound);
+      }
+
+      return patientUpdated;
     });
+
+    const reloadResult = await result.reload();
+
     res.json({
-      data: patientQuery,
+      data: reloadResult,
       success: true,
       statusCode: '200',
     });
@@ -161,7 +186,7 @@ exports.update = async (req, res, next) => {
 };
 
 exports.create = async (req, res, next) => {
-  // Save User to Database
+  // Save patient to Database
   const { ...patientData } = req.body;
   try {
     if (req.body.city_id && req.body.agreement_id) {
