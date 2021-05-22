@@ -26,10 +26,15 @@ async function getHistory(id) {
           },
           {
             model: Patient,
-            include: {
-              model: City,
-              include: [State],
-            },
+            include: [
+              {
+                model: City,
+                include: [State],
+              },
+              {
+                model: Agreement,
+              },
+            ],
           },
         ],
       });
