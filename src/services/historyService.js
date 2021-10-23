@@ -11,6 +11,7 @@ const City = db.city;
 const State = db.state;
 const Code = db.code;
 const Agreement = db.agreement;
+const Contact = db.contact;
 const { Op } = db.Sequelize;
 
 async function getHistory(id) {
@@ -56,10 +57,12 @@ async function getHistory(id) {
   }
 }
 
-async function getAllHistories(page, pageSize) {
+async function getAllHistories(queryParams) {
+  const { page = 0, pageSize = 10, patientId } = queryParams;
+  const whereObject = patientId ? { patient_id: patientId } : {};
   try {
     const { rows, count } = await History.findAndCountAll({
-      where: {},
+      where: whereObject,
       ...paginate({ page, pageSize }),
       include: [
         {
@@ -70,6 +73,7 @@ async function getAllHistories(page, pageSize) {
           }],
         },
       ],
+      order: [['created_at', 'DESC']],
     });
     const pages = Math.ceil(count / pageSize);
     return {
@@ -98,8 +102,29 @@ async function updateHistory(history, historyData, userId) {
           where: {
             id: historyData.patient_id,
           },
+          include: [
+            {
+              model: City,
+              include: [State],
+            },
+            {
+              model: Agreement,
+            },
+            {
+              model: Contact,
+            },
+          ],
         }, { transaction: t });
+
         await historyUpdated.setPatient(patientFound);
+
+        // Check if patient info needs to be updated
+        if (historyData.updatePatientInfoField) {
+          const desiredPatientValues = omit(patientFound.dataValues, ['id', 'iid', 'status', 'created_by_id', 'updated_by_id', 'created_at', 'updated_at']);
+          await history.update({
+            patient_info_save: desiredPatientValues,
+          });
+        }
       }
       if (historyData.agreement_id) {
         const agreementFound = await Agreement.findOne({
@@ -155,8 +180,24 @@ async function createHistory(historyData, userId) {
         where: {
           id: historyData.patient_id,
         },
+        include: [
+          {
+            model: City,
+            include: [State],
+          },
+          {
+            model: Agreement,
+          },
+          {
+            model: Contact,
+          },
+        ],
       }).then((patient) => {
         history.setPatient(patient);
+        const desiredPatientValues = omit(patient.dataValues, ['id', 'iid', 'status', 'created_by_id', 'updated_by_id', 'created_at', 'updated_at']);
+        history.update({
+          patient_info_save: desiredPatientValues,
+        });
       });
       await Agreement.findOne({
         where: {

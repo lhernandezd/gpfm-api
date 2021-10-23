@@ -9,7 +9,7 @@ const defaultHistoryPDFDefinition = {
     stack: [
       {
         columns: [
-          { text: [{ text: 'Teléfono: ', bold: true }, '345 8469579 - 315 8980566'], alignment: 'center' },
+          { text: [{ text: 'Teléfono: ', bold: true }, '3158980566'], alignment: 'center' },
           { text: [{ text: 'Email: ', bold: true }, 'mariolly-1998@hotmail.com'], alignment: 'center' },
           { text: [{ text: 'Ciudad: ', bold: true }, 'Barranquilla'], alignment: 'center' },
         ],

@@ -14,9 +14,8 @@ exports.id = async (req, res, next, id) => {
 };
 
 exports.all = async (req, res, next) => {
-  const { page = 0, pageSize = 10 } = req.query;
   try {
-    const { data, meta } = await getAllHistories(page, pageSize);
+    const { data, meta } = await getAllHistories(req.query);
     res.json({
       data,
       success: true,

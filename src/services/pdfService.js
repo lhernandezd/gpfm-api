@@ -2,6 +2,7 @@
 const PdfPrinter = require('pdfmake');
 const path = require('path');
 const { format } = require('date-fns');
+const startCase = require('lodash/startCase');
 const { defaultHistoryPDFDefinition } = require('../defaults');
 const { patientData } = require('../utils/pdfDataManipulation');
 
@@ -42,15 +43,20 @@ function createHistoryPDF(history, cllbk) {
     breath_frequency, temperature, medical_evolution,
     background, medicine, exam_performed, reason, physical_exam,
     treatment_plan, medical_formula, consent,
-    updated_at, patient, codes,
+    updated_at, codes, patient_info_save, patient,
   } = history.dataValues;
 
   const patientObjectData = patientData(patient);
+  const patientOnSave = patientData(patient_info_save);
   const {
-    patientFirstName, patientLastName, patientFullName,
-    patientIdentification, patientAddress, patientBirthDate,
-    patientAgreement, patientPhoneNumber, patientGender,
+    patientFullName, patientBirthDate, patientGender,
+    patientLastName, patientFirstName,
   } = patientObjectData;
+
+  const {
+    patientIdentification: patientIdentificationOnSave, patientAddress: patientAddressOnSave,
+    patientPhoneNumber: patientPhoneNumberOnSave, patientAgreement: patientAgreementOnSave,
+  } = patientOnSave;
 
   const cieCodes = codes.map((code) => `${code.code} - ${code.description}`).join(', ');
 
@@ -97,14 +103,14 @@ function createHistoryPDF(history, cllbk) {
             {
               text: [
                 { text: 'Paciente: ', bold: true },
-                `${patientFullName}`,
+                `${startCase(patientFullName)}`,
               ],
               alignment: 'left',
             },
             {
               text: [
                 { text: 'Identificación: ', bold: true },
-                `${patientIdentification}`,
+                `${patientIdentificationOnSave}`,
               ],
               alignment: 'right',
             },
@@ -116,7 +122,7 @@ function createHistoryPDF(history, cllbk) {
             {
               text: [
                 { text: 'Dirección: ', bold: true },
-                `${patientAddress}`,
+                `${patientAddressOnSave}`,
               ],
               alignment: 'left',
             },
@@ -135,14 +141,14 @@ function createHistoryPDF(history, cllbk) {
             {
               text: [
                 { text: 'Convenio: ', bold: true },
-                `${patientAgreement}`,
+                `${patientAgreementOnSave}`,
               ],
               alignment: 'left',
             },
             {
               text: [
                 { text: 'Teléfono: ', bold: true },
-                `${patientPhoneNumber}`,
+                `${patientPhoneNumberOnSave}`,
               ],
               alignment: 'right',
             },

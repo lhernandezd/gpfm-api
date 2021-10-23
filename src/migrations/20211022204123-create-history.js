@@ -90,6 +90,9 @@ module.exports = {
         key: 'id',
       },
     },
+    patient_info_save: {
+      type: Sequelize.JSONB,
+    },
     created_by_id: {
       type: Sequelize.UUID,
       references: {

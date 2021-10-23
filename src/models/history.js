@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     consent: DataTypes.TEXT,
     current_illness: DataTypes.TEXT,
     current_treatment: DataTypes.TEXT,
+    patient_info_save: DataTypes.JSONB,
     created_by_id: DataTypes.UUID,
     updated_by_id: DataTypes.UUID,
   }, {});

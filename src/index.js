@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const config = require('../config');
@@ -17,11 +16,10 @@ app.use(
 );
 
 // Parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 
 // Parse application/json
-app.use(bodyParser.json());
-
+app.use(express.json());
 
 // Routes
 app.use('/api', routes);
