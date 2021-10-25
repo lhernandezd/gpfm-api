@@ -52,8 +52,8 @@ exports.all = async (req, res, next) => {
       success: true,
       statusCode: '200',
       meta: {
-        page: page + 1,
-        pageSize,
+        page: parseInt(page, 10) + 1,
+        pageSize: parseInt(pageSize, 10),
         pages,
       },
     });

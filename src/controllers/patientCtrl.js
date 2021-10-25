@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
 const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
+const orderQuery = require('../utils/orderQuery');
 const db = require('../models');
 
 const Patient = db.patient;
@@ -52,8 +53,9 @@ exports.id = async (req, res, next, id) => {
 };
 
 exports.all = async (req, res, next) => {
-  const { page = 0, pageSize = 10 } = req.query;
+  const { page = 0, pageSize = 10, order = {} } = req.query;
   try {
+    const orderArray = orderQuery(order);
     const { rows, count } = await Patient.findAndCountAll({
       where: {},
       ...paginate({ page, pageSize }),
@@ -69,6 +71,7 @@ exports.all = async (req, res, next) => {
           model: Contact,
         },
       ],
+      order: orderArray,
     });
     const pages = Math.ceil(count / pageSize);
     res.json({
@@ -76,9 +79,10 @@ exports.all = async (req, res, next) => {
       success: true,
       statusCode: '200',
       meta: {
-        page: page + 1,
-        pageSize,
+        page: parseInt(page, 10) + 1,
+        pageSize: parseInt(pageSize, 10),
         pages,
+        order: orderArray,
       },
     });
   } catch (error) {

@@ -60,6 +60,7 @@ async function getHistory(id) {
 async function getAllHistories(queryParams) {
   const { page = 0, pageSize = 10, patientId } = queryParams;
   const whereObject = patientId ? { patient_id: patientId } : {};
+  // console.log(typeof pageSize, typeof page);
   try {
     const { rows, count } = await History.findAndCountAll({
       where: whereObject,
@@ -78,9 +79,11 @@ async function getAllHistories(queryParams) {
     const pages = Math.ceil(count / pageSize);
     return {
       data: rows,
+      success: true,
+      statusCode: '200',
       meta: {
-        page: page + 1,
-        pageSize,
+        page: parseInt(page, 10) + 1,
+        pageSize: parseInt(pageSize, 10),
         pages,
       },
     };
