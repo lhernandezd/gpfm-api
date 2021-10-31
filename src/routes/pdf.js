@@ -9,7 +9,7 @@ router
   .route('/')
   .post(
     authJwt.verifyToken,
-    authJwt.isAdmin,
+    authJwt.isUserOrAdmin,
     controller.create,
   );
 

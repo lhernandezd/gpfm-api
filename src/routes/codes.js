@@ -7,6 +7,6 @@ const controller = require('../controllers/codeCtrl');
 
 router
   .route('/')
-  .get(authJwt.verifyToken, authJwt.isAdmin, controller.all);
+  .get(authJwt.verifyToken, authJwt.isUserOrAdmin, controller.all);
 
 module.exports = router;
