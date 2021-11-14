@@ -189,6 +189,7 @@ exports.create = async (req, res, next) => {
         });
       });
     } else {
+      await user.destroy();
       throw new Error('User role required');
     }
   } catch (error) {

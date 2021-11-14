@@ -9,6 +9,7 @@ const codes = require('./codes');
 const entities = require('./entities');
 const agreements = require('./agreements');
 const pdf = require('./pdf');
+const appointments = require('./appointments');
 
 router.use('/auth', auth);
 router.use('/users', users);
@@ -19,5 +20,6 @@ router.use('/codes', codes);
 router.use('/entities', entities);
 router.use('/agreements', agreements);
 router.use('/pdf', pdf);
+router.use('/appointments', appointments);
 
 module.exports = router;

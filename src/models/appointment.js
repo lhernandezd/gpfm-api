@@ -15,7 +15,9 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
     },
+    title: DataTypes.STRING,
     description: DataTypes.STRING,
+    all_day: DataTypes.BOOLEAN,
     created_by_id: DataTypes.UUID,
     updated_by_id: DataTypes.UUID,
   }, {});
