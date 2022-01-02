@@ -21,4 +21,12 @@ router
   .route('/signintoken')
   .post(authJwt.verifyToken, controller.signintoken);
 
+router
+  .route('/recover')
+  .post(controller.recover);
+
+router
+  .route('/reset/:token')
+  .post(controller.reset);
+
 module.exports = router;
