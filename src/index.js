@@ -15,6 +15,9 @@ app.use(
   }),
 );
 
+// Limit json
+app.use(express.json({ limit: '50MB' }));
+
 // Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 

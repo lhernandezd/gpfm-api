@@ -4,6 +4,7 @@ const validator = require('validator');
 const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
 const orderQuery = require('../utils/orderQuery');
+const searchQuery = require('../utils/searchQuery');
 const db = require('../models');
 
 const Patient = db.patient;
@@ -53,11 +54,16 @@ exports.id = async (req, res, next, id) => {
 };
 
 exports.all = async (req, res, next) => {
-  const { page = 0, pageSize = 10, order = {} } = req.query;
+  const {
+    page = 0, pageSize = 10, order = {}, search = {},
+  } = req.query;
   try {
     const orderArray = orderQuery(order);
+    const searchArray = searchQuery(search);
     const { rows, count } = await Patient.findAndCountAll({
-      where: {},
+      where: {
+        ...searchArray,
+      },
       ...paginate({ page, pageSize }),
       include: [
         {
