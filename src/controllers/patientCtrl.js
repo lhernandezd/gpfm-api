@@ -5,6 +5,7 @@ const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
 const orderQuery = require('../utils/orderQuery');
 const searchQuery = require('../utils/searchQuery');
+const includesParse = require('../utils/includesParse');
 const db = require('../models');
 
 const Patient = db.patient;
@@ -55,31 +56,36 @@ exports.id = async (req, res, next, id) => {
 
 exports.all = async (req, res, next) => {
   const {
-    page = 0, pageSize = 10, order = {}, search = {},
+    page = 0, pageSize = 10, order = {}, search = {}, includes = [],
   } = req.query;
   try {
     const orderArray = orderQuery(order);
     const searchArray = searchQuery(search);
+    const includesArray = includesParse(includes);
+    includesArray.push(
+      {
+        model: City,
+        include: [State],
+      },
+      {
+        model: Agreement,
+      },
+      {
+        model: Contact,
+      },
+    );
+
     const { rows, count } = await Patient.findAndCountAll({
       where: {
         ...searchArray,
       },
       ...paginate({ page, pageSize }),
-      include: [
-        {
-          model: City,
-          include: [State],
-        },
-        {
-          model: Agreement,
-        },
-        {
-          model: Contact,
-        },
-      ],
+      include: includesArray,
       order: orderArray,
     });
+
     const pages = Math.ceil(count / pageSize);
+
     res.json({
       data: rows,
       success: true,
