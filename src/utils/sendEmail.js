@@ -4,12 +4,13 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const fromEmail = process.env.SENDGRID_EMAIL;
 
-const sendMail = async (to, subject, html) => {
+const sendMail = async (to, subject, html, attachments = []) => {
   const msg = {
     to,
     from: fromEmail,
     subject,
     html,
+    attachments,
   };
 
   try {
@@ -19,7 +20,7 @@ const sendMail = async (to, subject, html) => {
   }
 };
 
-const sendMailWithTemplate = async (to, subject, template) => {
+const sendMailWithTemplate = async (to, subject, template, attachments = []) => {
   const msg = {
     to,
     from: fromEmail,
@@ -28,6 +29,23 @@ const sendMailWithTemplate = async (to, subject, template) => {
       subject,
       ...template.params,
     },
+    attachments,
+  };
+
+  try {
+    await sgMail.send(msg);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const sendMailWithCustomContent = async (to, subject, content, attachments = []) => {
+  const msg = {
+    to,
+    from: fromEmail,
+    subject,
+    content,
+    attachments,
   };
 
   try {
@@ -40,4 +58,5 @@ const sendMailWithTemplate = async (to, subject, template) => {
 module.exports = {
   sendMail,
   sendMailWithTemplate,
+  sendMailWithCustomContent,
 };

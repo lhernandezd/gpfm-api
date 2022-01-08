@@ -1,7 +1,8 @@
-/* eslint-disable camelcase */
-const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
+const ics = require('ics');
 const paginate = require('../utils/paginate');
+const { sendMailWithCustomContent } = require('../utils/sendEmail');
+const { eventData } = require('../utils/calendarEventData');
 const db = require('../models');
 
 const Appointment = db.appointment;
@@ -154,15 +155,37 @@ exports.create = async (req, res, next) => {
       updated_by_id: req.userId,
     });
     if (req.body.patient_id) {
-      await Patient.findOne({
+      const patientForAppointment = await Patient.findOne({
         where: {
           id: req.body.patient_id,
         },
-      }).then((patient) => {
-        appointment.setPatient(patient).then(() => {
-          res.send({ message: 'Appointmenr was registered successfully!' });
-        });
       });
+
+      await appointment.setPatient(patientForAppointment);
+
+      const subject = 'Cita Agendada';
+      const event = eventData(appointmentData, patientForAppointment);
+
+      const { value } = ics.createEvent(event);
+
+      const content = [
+        {
+          type: 'text/calendar; method=REQUEST',
+          value,
+        },
+      ];
+      const attachments = [
+        {
+          content: Buffer.from(value).toString('base64'),
+          type: 'application/ics',
+          namw: 'invite.ics',
+          filename: 'invite.ics',
+          disposition: 'attachment',
+        },
+      ];
+
+      await sendMailWithCustomContent(patientForAppointment.email, subject, content, attachments);
+      res.send({ message: 'Appointment was registered successfully!' });
     } else {
       throw new Error('Patient required');
     }
