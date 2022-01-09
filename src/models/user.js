@@ -20,6 +20,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
+    full_name: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return `${this.first_name} ${this.last_name}`;
+      },
+      set() {
+        throw new Error('Do not try to set the `fullName` value!');
+      },
+    },
     phone_number: DataTypes.STRING,
     address: DataTypes.STRING,
     username: DataTypes.STRING,

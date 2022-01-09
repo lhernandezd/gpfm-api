@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
     document: DataTypes.STRING,
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
-    fullName: {
+    full_name: {
       type: DataTypes.VIRTUAL,
       get() {
         return `${this.first_name} ${this.last_name}`;

@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const db = require('../models');
 const config = require('../../config');
-const { sendMail } = require('../utils/sendEmail');
+const { sendMailWithTemplate } = require('../utils/sendEmail');
 
 const User = db.user;
 const City = db.city;
@@ -169,21 +169,14 @@ exports.recover = async (req, res, next) => {
 
     const link = `${process.env.CLIENT_URL}/resetPassword/${token}`;
     const subject = 'Password change request';
-    const html = `
-      <html>
-      <head>
-          <style>
-          </style>
-      </head>
-      <body>
-          <p>Hi ${user.first_name},</p>
-          <p>You requested to reset your password.</p>
-          <p> Please, click the link below to reset your password</p>
-          <a href="${link}">${link}</a>
-      </body>
-      </html>
-    `;
-    sendMail(user.email, subject, html);
+    const template = {
+      id: process.env.RECOVER_EMAIL_TEMPLATE,
+      params: {
+        name: user.full_name,
+        link,
+      },
+    };
+    sendMailWithTemplate(user.email, subject, template);
     res.status(200).send({
       message: 'Email sent',
     });

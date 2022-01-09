@@ -1,8 +1,10 @@
 const validator = require('validator');
 const ics = require('ics');
+const capitalize = require('lodash/capitalize');
 const paginate = require('../utils/paginate');
-const { sendMailWithCustomContent } = require('../utils/sendEmail');
+const { sendMailWithTemplate } = require('../utils/sendEmail');
 const { eventData } = require('../utils/calendarEventData');
+const { dateObjFromISOString } = require('../utils/dates');
 const db = require('../models');
 
 const Appointment = db.appointment;
@@ -48,7 +50,7 @@ exports.id = async (req, res, next, id) => {
 };
 
 exports.all = async (req, res, next) => {
-  const { page = 0, pageSize = 10 } = req.query;
+  const { page = 0, pageSize = 200 } = req.query;
   try {
     const { rows, count } = await Appointment.findAndCountAll({
       where: {},
@@ -168,12 +170,6 @@ exports.create = async (req, res, next) => {
 
       const { value } = ics.createEvent(event);
 
-      const content = [
-        {
-          type: 'text/calendar; method=REQUEST',
-          value,
-        },
-      ];
       const attachments = [
         {
           content: Buffer.from(value).toString('base64'),
@@ -184,7 +180,22 @@ exports.create = async (req, res, next) => {
         },
       ];
 
-      await sendMailWithCustomContent(patientForAppointment.email, subject, content, attachments);
+      const {
+        year: startYear, month: startMonth, day: startDay, hour: startHour, minute: startMinute,
+      } = dateObjFromISOString(appointmentData.start_date, 'yyyy/MMMM/d/H/mm', 'es');
+      const template = {
+        id: process.env.APPOINTMENT_EMAIL_TEMPLATE,
+        params: {
+          name: patientForAppointment.full_name,
+          date: `${capitalize(startMonth)} ${startDay}, ${startYear}`,
+          hour: `${startHour}:${startMinute}`,
+        },
+      };
+
+      const fromEmail = process.env.SENDGRID_EMAIL;
+      const to = [patientForAppointment.email, fromEmail];
+
+      await sendMailWithTemplate(to, subject, template, attachments);
       res.send({ message: 'Appointment was registered successfully!' });
     } else {
       throw new Error('Patient required');
