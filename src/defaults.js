@@ -1,5 +1,7 @@
 const path = require('path');
 
+const fromEmail = process.env.SENDGRID_EMAIL;
+
 const defaultHistoryPDFDefinition = {
   pageMargins: [40, 70, 40, 60],
   defaultStyle: {
@@ -9,8 +11,8 @@ const defaultHistoryPDFDefinition = {
     stack: [
       {
         columns: [
-          { text: [{ text: 'Teléfono: ', bold: true }, '3158980566'], alignment: 'center' },
-          { text: [{ text: 'Email: ', bold: true }, 'mariolly-1998@hotmail.com'], alignment: 'center' },
+          { text: [{ text: 'Teléfono: ', bold: true }, '300 8469579'], alignment: 'center' },
+          { text: [{ text: 'Email: ', bold: true }, fromEmail], alignment: 'center' },
           { text: [{ text: 'Ciudad: ', bold: true }, 'Barranquilla'], alignment: 'center' },
         ],
         style: 'smallBottomMargin',
