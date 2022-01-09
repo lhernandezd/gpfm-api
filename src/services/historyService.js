@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const validator = require('validator');
 const omit = require('lodash/omit');
 const paginate = require('../utils/paginate');
+const searchQuery = require('../utils/searchQuery');
 const db = require('../models');
 
 const Patient = db.patient;
@@ -58,12 +59,15 @@ async function getHistory(id) {
 }
 
 async function getAllHistories(queryParams) {
-  const { page = 0, pageSize = 10, patientId } = queryParams;
-  const whereObject = patientId ? { patient_id: patientId } : {};
-
+  const {
+    page = 0, pageSize = 10, search = {},
+  } = queryParams;
+  const searchArray = searchQuery(search);
   try {
     const { rows, count } = await History.findAndCountAll({
-      where: whereObject,
+      where: {
+        ...searchArray,
+      },
       ...paginate({ page, pageSize }),
       include: [
         {

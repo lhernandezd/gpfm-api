@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 const isString = require('lodash/isString');
+const omitBy = require('lodash/omitBy');
+const isNil = require('lodash/isNil');
 const db = require('../models');
 
 const { Op } = db.Sequelize;
@@ -15,7 +17,8 @@ const searchQuery = (search) => {
     }
   });
   const searchCompleted = Object.fromEntries(searchEntries);
-  return searchCompleted;
+  const validSearch = omitBy(searchCompleted, isNil);
+  return validSearch;
 };
 
 module.exports = searchQuery;
