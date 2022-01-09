@@ -3,7 +3,7 @@ const PdfPrinter = require('pdfmake');
 const path = require('path');
 const { format } = require('date-fns');
 const startCase = require('lodash/startCase');
-const { defaultHistoryPDFDefinition } = require('../defaults');
+const { pdfTemplateA } = require('../defaults');
 const { patientData } = require('../utils/pdfDataManipulation');
 
 async function createPdfBinary(pdfDocDef, fileName, cllbk) {
@@ -43,8 +43,12 @@ function createHistoryPDF(history, cllbk) {
     breath_frequency, temperature, medical_evolution,
     background, medicine, exam_performed, reason, physical_exam,
     treatment_plan, medical_formula, consent,
-    updated_at, codes, patient_info_save, patient,
+    updated_at, codes, patient_info_save, patient, template,
   } = history.dataValues;
+
+  const templates = {
+    A: pdfTemplateA,
+  };
 
   const patientObjectData = patientData(patient);
   const patientOnSave = patientData(patient_info_save);
@@ -308,7 +312,7 @@ function createHistoryPDF(history, cllbk) {
   ];
 
   const docDefinition = {
-    ...defaultHistoryPDFDefinition,
+    ...templates[template],
     header: customHeader,
     content,
 

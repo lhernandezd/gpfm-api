@@ -2,7 +2,7 @@ const path = require('path');
 
 const fromEmail = process.env.SENDGRID_EMAIL;
 
-const defaultHistoryPDFDefinition = {
+const pdfTemplateA = {
   pageMargins: [40, 70, 40, 60],
   defaultStyle: {
     fontSize: 11,
@@ -77,6 +77,6 @@ const genderStrings = {
 };
 
 module.exports = {
-  defaultHistoryPDFDefinition,
+  pdfTemplateA,
   genderStrings,
 };
